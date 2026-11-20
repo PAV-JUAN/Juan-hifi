@@ -1,5 +1,6 @@
 package com.pavjuan.music
 
+import android.net.Uri
 import android.content.Context
 import android.os.Bundle
 import androidx.media3.common.MediaItem
@@ -141,6 +142,9 @@ fun toMediaItem(song: Song): MediaItem =
                 .setTitle(song.title)
                 .setArtist(song.artist)
                 .setAlbumTitle(song.album)
+                .setArtworkUri(
+                    if (song.coverArt.isNotEmpty()) Uri.parse(coverUrl(song.coverArt, 600)) else null
+                )
                 .setExtras(Bundle().apply {
                     putString("cover", song.coverArt)
                     putString("albumId", song.albumId)

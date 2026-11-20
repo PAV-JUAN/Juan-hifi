@@ -1,5 +1,9 @@
 package com.pavjuan.music
 
+import android.content.ComponentName
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
+import com.google.common.util.concurrent.ListenableFuture
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -30,16 +34,22 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 
 class MainActivity : ComponentActivity() {
+    private var controllerFuture: ListenableFuture<MediaController>? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Session.load(this)
         Turntable.init(this)
+        val token = SessionToken(this, ComponentName(this, PlaybackService::class.java))
+        controllerFuture = MediaController.Builder(this, token).buildAsync()
         setContent { ShopApp() }
     }
-
+    override fun onStop() {
+        Turntable.saveSpot()
+        super.onStop()
+    }
     override fun onDestroy() {
+        controllerFuture?.let { MediaController.releaseFuture(it) }
         super.onDestroy()
-        if (isFinishing) Turntable.release()
     }
 }
 
